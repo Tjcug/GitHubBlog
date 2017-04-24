@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="Dr.Lester">
+
+
+
+<meta name="description" content="本文分享自己对ssh三大框架的理解，有问题欢迎来讨论">
+<meta name="keywords" content="java,框架,IOC,AOP,Struts,Spring,Hibernate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓">
+<meta property="og:url" content="http://GitHubSupervise.io/blog/2017/04/01/sshIntegration/index.html">
+<meta property="og:site_name" content="Godql Code">
+<meta property="og:description" content="本文分享自己对ssh三大框架的理解，有问题欢迎来讨论">
+<meta property="og:image" content="http://githubsupervise.io/img/Spring.png">
+<meta property="og:image" content="http://githubsupervise.io/img/Ioc.png">
+<meta property="og:updated_time" content="2017-04-18T12:33:59.011Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓">
+<meta name="twitter:description" content="本文分享自己对ssh三大框架的理解，有问题欢迎来讨论">
+<meta name="twitter:image" content="http://githubsupervise.io/img/Spring.png">
+
+<link rel="apple-touch-icon" href="/blog//apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Godql Code" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/blog//favicon.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/blog/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓 | Godql Code</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.min.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = /blog/; </script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?942836f73232fb2653b75e8e40540295";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+    <script>
+        (function(){
+            var bp = document.createElement('script');
+            var curProtocol = window.location.protocol.split(':')[0];
+            if (curProtocol === 'https') {
+                bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+            }
+            else {
+                bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+            }
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(bp, s);
+        })();
+    </script>
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/blog/" class="profilepic">
+            <img src="/blog//img/Dr.Lester.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/blog/">Dr.Lester</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">迈入新世界，为了成为独当一面的 Java 后端工程师！</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false">
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                            
+
+                                <li>
+                                        <!--<a href="/blog//blog/index/">
+                                            主页
+                                        </a>-->
+                                        <!-- 改动的 -->
+                                        <a href="/blog/index/">
+                                            主页
+                                        </a>
+                                </li>
+                            
+
+                                <li>
+                                        <!--<a href="/blog//blog/archives/">
+                                            归档
+                                        </a>-->
+                                        <!-- 改动的 -->
+                                        <a href="/blog/archives/">
+                                            归档
+                                        </a>
+                                </li>
+                            
+
+                                <li>
+                                        <!--<a href="/blog//blog/demo/">
+                                            Demo
+                                        </a>-->
+                                        <!-- 改动的 -->
+                                        <a href="/blog/demo/">
+                                            Demo
+                                        </a>
+                                </li>
+                            
+
+                                <li>
+                                        <!--<a href="/blog//blog/tags/">
+                                            标签云
+                                        </a>-->
+                                        <!-- 改动的 -->
+                                        <a href="/blog/tags/">
+                                            标签云
+                                        </a>
+                                </li>
+                            
+
+                                <li>
+                                        <!--<a href="/blog//blog/about/">
+                                            关于我
+                                        </a>-->
+                                        <!-- 改动的 -->
+                                        <a href="/blog/about/">
+                                            关于我
+                                        </a>
+                                </li>
+                            
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:googllwebmaster@gmail.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/GitHubSupervise" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/blog/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa Google" href="https://plus.google.com/101569408012577181557" title="Google"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AOP/">AOP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Chrome/">Chrome</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Hibernate/">Hibernate</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/IOC/">IOC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MVC/">MVC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Spring/">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Struts/">Struts</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/交互/">交互</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/优雅/">优雅</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/前端/">前端</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/客户端/">客户端</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/工作法/">工作法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/思维导图/">思维导图</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/框架/">框架</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/秒杀系统/">秒杀系统</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/读书/">读书</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/调试/">调试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/资源/">资源</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">此地只专注于技术</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Dr.Lester</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/blog/" class="profilepic">
+                <img src="/blog//img/Dr.Lester.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/blog/" title="回到主页">Dr.Lester</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">迈入新世界，为了成为独当一面的 Java 后端工程师！</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/blog/index/">主页</a></li>
+                
+                    <li><a href="/blog/archives/">归档</a></li>
+                
+                    <li><a href="/blog/demo/">Demo</a></li>
+                
+                    <li><a href="/blog/tags/">标签云</a></li>
+                
+                    <li><a href="/blog/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:googllwebmaster@gmail.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/GitHubSupervise" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/blog/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa Google" target="_blank" href="https://plus.google.com/101569408012577181557" title="Google"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-sshIntegration" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/blog/2017/04/01/sshIntegration/" class="article-date">
+      <time datetime="2017-03-31T21:40:27.000Z" itemprop="datePublished">2017-04-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        <h1 class="article-title" itemprop="name">
+      SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓
+    </h1>
+      </header>
+      
+      <div class="article-info article-info-post">
+        <div class="article-category tagcloud">
+    <a class="article-category-link" href="/blog/categories/Java/">Java</a>
+    </div>
+        <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/AOP/">AOP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/Hibernate/">Hibernate</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/IOC/">IOC</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/Spring/">Spring</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/Struts/">Struts</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/框架/">框架</a></li></ul>
+    </div>
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <a id="more"></a>
+<h2 id="ssh三大框架整合的意义及其精髓"><a href="#ssh三大框架整合的意义及其精髓" class="headerlink" title="ssh三大框架整合的意义及其精髓"></a>ssh三大框架整合的意义及其精髓</h2><h3 id="hibernate工作原理"><a href="#hibernate工作原理" class="headerlink" title="hibernate工作原理"></a>hibernate工作原理</h3><ul>
+<li>原理：<ul>
+<li>读取并解析配置文件</li>
+<li>读取并解析映射信息，创建<code>SessionFactory</code></li>
+<li>打开<code>Sesssion</code></li>
+<li>创建事务<code>Transation</code></li>
+<li>持久化操作</li>
+<li>提交事务</li>
+<li>关闭<code>Session</code></li>
+<li>关闭<code>SesstionFactory</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="为什么要用："><a href="#为什么要用：" class="headerlink" title="为什么要用："></a>为什么要用：</h4><ul>
+<li>对JDBC访问数据库的代码做了封装，大大简化了数据访问层繁琐的重复性代码。</li>
+<li>Hibernate是一个基于JDBC的主流持久化框架，是一个优秀的ORM实现。他很大程度的简化DAO层的编码工作</li>
+<li>hibernate使用Java反射机制，而不是字节码增强程序来实现透明性。</li>
+<li>hibernate的性能还可以，因为它是个轻量级框架。映射的灵活性很出色。它支持各种关系数据库，从一对一到多对多的各种复杂关系。</li>
+</ul>
+<h4 id="Hibernate是如何延迟加载"><a href="#Hibernate是如何延迟加载" class="headerlink" title="Hibernate是如何延迟加载?"></a>Hibernate是如何延迟加载?</h4><ul>
+<li>Hibernate2延迟加载实现：<ul>
+<li>实体对象</li>
+<li>集合（Collection）</li>
+</ul>
+</li>
+<li>Hibernate3 提供了属性的延迟加载功能</li>
+<li>当Hibernate在查询数据的时候，数据并没有存在与内存中，当程序真正对数据的操作时，对象才存在与内存中，就实现了延迟加载，他节省了服务器的内存开销，从而提高了服务器的性能。</li>
+</ul>
+<h4 id="Hibernate中怎样实现类之间的关系-如：一对多、多对多的关系"><a href="#Hibernate中怎样实现类之间的关系-如：一对多、多对多的关系" class="headerlink" title="Hibernate中怎样实现类之间的关系?(如：一对多、多对多的关系)"></a>Hibernate中怎样实现类之间的关系?(如：一对多、多对多的关系)</h4><ul>
+<li>类与类之间的关系主要体现在表与表之间的关系进行操作，它们都是对对象进行操作，我们程序中把所有的表与类都映射在一起，它们通过配置文件中的many-to-one、one-to-many、many-to-many。</li>
+</ul>
+<h4 id="Hibernate的缓存机制"><a href="#Hibernate的缓存机制" class="headerlink" title="Hibernate的缓存机制"></a>Hibernate的缓存机制</h4><ul>
+<li>内部缓存存在Hibernate中又叫一级缓存，属于应用事物级缓存 </li>
+<li>二级缓存：<ul>
+<li>应用及缓存</li>
+<li>分布式缓存</li>
+<li>条件：数据不会被第三方修改、数据大小在可接受范围、数据更新频率低、同一数据被系统频繁使用、非关键数据</li>
+<li>第三方缓存的实现<h4 id="Hibernate的查询方式-Sql、Criteria-object-comptosition"><a href="#Hibernate的查询方式-Sql、Criteria-object-comptosition" class="headerlink" title="Hibernate的查询方式 Sql、Criteria,object comptosition"></a>Hibernate的查询方式 Sql、Criteria,object comptosition</h4></li>
+</ul>
+</li>
+<li>Hql：<ul>
+<li>属性查询</li>
+<li>参数查询、命名参数查询</li>
+<li>关联查询</li>
+<li>分页查询</li>
+<li>统计函数<h4 id="如何优化Hibernate？"><a href="#如何优化Hibernate？" class="headerlink" title="如何优化Hibernate？"></a>如何优化Hibernate？</h4></li>
+</ul>
+</li>
+<li>使用双向一对多关联，不使用单向一对多</li>
+<li>灵活使用单向一对多关联</li>
+<li>不用一对一，用多对一取代</li>
+<li>配置对象缓存，不使用集合缓存</li>
+<li>一对多集合使用Bag,多对多集合使用Set</li>
+<li>继承类使用显式多态</li>
+<li>表字段要少，表关联不要怕多，有二级缓存撑腰  <h3 id="Struts工作原理"><a href="#Struts工作原理" class="headerlink" title="Struts工作原理"></a>Struts工作原理</h3><h4 id="Struts工作机制？"><a href="#Struts工作机制？" class="headerlink" title="Struts工作机制？"></a>Struts工作机制？</h4></li>
+<li><p>工作机制：</p>
+<ul>
+<li>Struts的工作流程:<ul>
+<li>在web应用启动时就会加载初始化<code>ActionServlet</code>,<code>ActionServlet</code>从<br><code>struts-config.xml</code>文件中读取配置信息,把它们存放到各种配置对象<br>当<code>ActionServlet</code>接收到一个客户请求时,将执行如下流程.<ul>
+<li>检索和用户请求匹配的<code>ActionMapping</code>实例,如果不存在,就返回请求路径无效信息; </li>
+<li>如果<code>ActionForm</code>实例不存在,就创建一个<code>ActionForm</code>对象,把客户提交的表单数据保存到<code>ActionForm</code>对象中; </li>
+<li>根据配置信息决定是否需要表单验证.如果需要验证,就调用<code>ActionForm</code>的v<code>alidate()方法</code>; </li>
+<li>如果<code>ActionForm</code>的<code>validate()方法</code>返回null或返回一个不包含<code>ActionMessage</code>的<code>ActuibErrors</code>对象, 就表示表单验证成功; </li>
+<li><code>ActionServlet</code>根据<code>ActionMapping</code>所包含的映射信息决定将请求转发给哪个<code>Action</code>,如果相应的<code>Action</code>实例不存在,就先创建这个实例,然后调用<code>Action的execute()方法</code>; </li>
+<li><code>Action的execute()方法</code>返回一个<code>ActionForward</code>对象,<code>ActionServlet</code>在把客户请求转发给<code>ActionForward</code>对象指向的JSP组件; </li>
+<li><code>ActionForward</code>对象指向<code>JSP</code>组件生成动态网页,返回给客户;<h4 id="为什么要用：-1"><a href="#为什么要用：-1" class="headerlink" title="为什么要用："></a>为什么要用：</h4></li>
+</ul>
+</li>
+<li>JSP、Servlet、JavaBean技术的出现给我们构建强大的企业应用系统提供了可能。但用这些技术构建的系统非常的繁乱，所以在此之上，我们需要一个规则、一个把这些技术组织起来的规则，这就是框架，Struts便应运而生。</li>
+<li>基于Struts开发的应用由3类组件构成：控制器组件、模型组件、视图组件<h4 id="Struts的validate框架是如何验证的？"><a href="#Struts的validate框架是如何验证的？" class="headerlink" title="Struts的validate框架是如何验证的？"></a>Struts的validate框架是如何验证的？</h4></li>
+<li>在struts配置文件中配置具体的错误提示，再在<code>FormBean</code>中的<code>validate()</code>方法具体调用<h4 id="Struts的架构"><a href="#Struts的架构" class="headerlink" title="Struts的架构"></a>Struts的架构</h4></li>
+<li>MVC模式: web应用程序启动时就会加载并初始化<code>ActionServler</code>。用户提交表单时，一个配置好的<code>ActionForm</code>对象被创建，并被填入表单相应的数据，<code>ActionServler</code>根据<code>Struts-config.xml</code>文件配置好的设置决定是否需要表单验证，如果需要就调用<code>ActionForm</code>的<code>Validate()</code>验证后选择将请求发送到哪个<code>Action</code>，如果<code>Action</code>不存在，<code>ActionServlet</code>会先创建这个对象，然后调用 <code>Action的execute()方法</code>。<code>Execute()</code>从<code>ActionForm</code>对象中获取数据，完成业务逻辑，返回一个<code>ActionForward</code>对象，<code>ActionServlet</code>再把客户请求转发给<code>ActionForward</code>对象指定的jsp组件，<code>ActionForward</code>对象指定的jsp生成动态的网页，返回给客户<h3 id="spring工作原理"><a href="#spring工作原理" class="headerlink" title="spring工作原理"></a>spring工作原理</h3></li>
+<li>spring mvc请所有的请求都提交给<code>DispatcherServlet</code>,它会委托应用系统的其他模块负责负责对请求进行真正的处理工作。</li>
+<li>DispatcherServlet查询一个或多个<code>HandlerMapping</code>,找到处理请求的<code>Controller</code>.</li>
+<li>DispatcherServlet请请求提交到目标<code>Controller</code></li>
+<li>Controller进行业务逻辑处理后，会返回一个<code>ModelAndView</code></li>
+<li>Dispathcher查询一个或多个<code>ViewResolver</code>视图解析器,找到ModelAndView对象指定的视图对象</li>
+<li>视图对象负责渲染返回给客户端。<h4 id="为什么用："><a href="#为什么用：" class="headerlink" title="为什么用："></a>为什么用：</h4></li>
+<li>AOP 让开发人员可以创建非行为性的关注点，称为横切关注点，并将它们插入到应用程序代码中。使用 AOP 后，公共服务 （比如日志、持久性、事务等）就可以分解成方面并应用到域对象上，同时不会增加域对象的对象模型的复杂性。</li>
+<li>IOC 允许创建一个可以构造对象的应用环境，然后向这些对象传递它们的协作对象。正如单词 倒置 所表明的，IOC 就像反 过来的 JNDI。没有使用一堆抽象工厂、服务定位器、单元素（singleton）和直接构造（straight construction），每一个对象都是用其协作对象构造的。因此是由容器管理协作对象（collaborator）。<br>Spring即使一个AOP框架，也是一IOC容器。 Spring 最好的地方是它有助于您替换对象。有了 Spring，只要用 JavaBean 属性和配置文件加入依赖性（协作对象）。然后可以很容易地在需要时替换具有类似接口的协作对象。  <h4 id="Spring-框架是一个分层架构，由7个定义良好的模块组成。"><a href="#Spring-框架是一个分层架构，由7个定义良好的模块组成。" class="headerlink" title="Spring 框架是一个分层架构，由7个定义良好的模块组成。"></a>Spring 框架是一个分层架构，由7个定义良好的模块组成。</h4></li>
+<li>Spring 模块构建在核心容器之上，核心容器定义了创建、配置和管理 bean 的方式</li>
+<li><img src="/img/Spring.png" alt="Spring示图"> </li>
+<li>组成 Spring 框架的每个模块（或组件）都可以单独存在，或者与其他一个或多个模块联合实现。每个模块的功能如下：</li>
+</ul>
+</li>
+<li><code>核心容器</code>：核心容器提供 Spring 框架的基本功能。核心容器的主要组件是<code>BeanFactory</code>，它是工厂模式的实现。BeanFactory 使用控制反转 （IOC）模式将应用程序的配置和依赖性规范与实际的应用程序代码分开。</li>
+<li><code>Spring 上下文</code>：Spring 上下文是一个配置文件，向 Spring 框架提供上下文信息。Spring 上下文包括企业服务，例如 JNDI、EJB、电子邮件、国际化、校验和调度功能。</li>
+<li><code>Spring AOP</code>：通过配置管理特性，Spring AOP 模块直接将面向方面的编程功能集成到了 Spring 框架中。所以，可以很容易地使 Spring 框架管理的任何对象支持 AOP。Spring AOP 模块为基于 Spring 的应用程序中的对象提供了事务管理服务。通过使用 Spring AOP，不用依赖 EJB 组件，就可以将声明性事务管理集成到应用程序中。</li>
+<li><code>Spring DAO</code>：JDBC DAO 抽象层提供了有意义的异常层次结构，可用该结构来管理异常处理和不同数据库供应商抛出的错误消息。异常层次结构简化了错误处理，并且极大地降低了需要编写的异常代码数量（例如打开和关闭连接）。Spring DAO 的面向 JDBC 的异常遵从通用的 DAO 异常层次结构。</li>
+<li><code>Spring ORM</code>：Spring 框架插入了若干个 ORM 框架，从而提供了 ORM 的对象关系工具，其中包括 JDO、Hibernate 和 iBatis SQL Map。所有这些都遵从 Spring 的通用事务和 DAO 异常层次结构。</li>
+<li><code>Spring Web模块</code>：Web 上下文模块建立在应用程序上下文模块之上，为基于 Web 的应用程序提供了上下文。所以，Spring 框架支持与 Jakarta Struts 的集成。Web 模块还简化了处理多部分请求以及将请求参数绑定到域对象的工作。</li>
+<li><code>Spring MVC框架</code>：MVC 框架是一个全功能的构建 Web 应用程序的 MVC 实现。通过策略接口，MVC 框架变成为高度可配置的，MVC 容纳了大量视图技术，其中包括 JSP、Velocity、Tiles、iText 和 POI。</li>
+<li>Spring 框架的功能可以用在任何 J2EE 服务器中，大多数功能也适用于不受管理的环境。Spring 的核心要点是：支持不绑定到特定 J2EE 服务的可重用业务和数据访问对象。毫无疑问，这样的对象可以在不同 J2EE 环境 （Web 或 EJB）、独立应用程序、测试环境之间重用。<br>####IOC 和 AOP<ul>
+<li>控制反转的基本概念是：不创建对象，但是描述创建它们的方式。在代码中不直接与对象和服务连接，但在配置文件中描述哪一个组件需要哪一项服务。容器（在 Spring 框架中是 IOC 容器） 负责将这些联系在一起。</li>
+<li>它是依赖倒置原则的一种实现思想。<br>依赖倒置原则很好的解决了高层和低层之间的直接依赖，解决了<br>层与层之间的耦合度问题。但是，并没有解决对象的管理和装备的责任。意思也就是，所有对象的创建以及管理都必须在程序中完成。因此，当更换模块对象的时候，还是要修改原有的代码，这样又违反了开闭原则。<br>那么，控制反转的思想，就是将这些对象的创建管理以及装配等工作直接从程序中移除出来，交由给一个第三方的管理者去负责，这样就是将对象的控制权转移到了第三方的身上，这个过程就称之为控制反转。在控制反转中，都会有一个第三方的容器去管理和存储这些对象，这个容器就叫做IOC容器。<ul>
+<li>IOC容器可以提供两种实现供客户端使用：<ul>
+<li><code>依赖查找</code>，也就是客户端主动的从容器中去查找需要的对象。（根据bean Id）由应用程序负责到容器中查找所需要依赖的资源或对象，例如JAVA中的JNDI（Java naming Directory Interface）</li>
+<li><code>依赖注入</code>，正好和以来查找相反，客户端所需的对象不需要自己去容器中查找，而是由容器自动的把这个对象注入到客户端中。（容器工厂赋值到程序中）<ul>
+<li><code>作用</code>：由容器完成对对象之间依赖装配</li>
+<li><code>装配</code>（属性、get方法、 构造方法）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>（好莱坞原则，“你不要来找我，我会来找你”）<ul>
+<li>例子：吃饭，之前要自己做，后来 别人做好饭且喂到你嘴里         </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>在典型的 IOC 场景中，容器创建了所有对象，并设置必要的属性将它们连接在一起，决定什么时间调用方法。下表列出了 IOC 的一个实现模式。</p>
+<ul>
+<li><img src="/img/Ioc.png" alt="IOC示图"> </li>
+</ul>
+</li>
+</ul>
+<iframe src="http://www.godql.com/blog/simple/index.html" style="overflow-x:hidden;overflow-y:hidden; border:0xp none #fff; min-height:240px; width:100%" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
+      
+    </div>
+    
+  </div>
+  
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/blog/2017/04/01/sshIntegration/">SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Dr.Lester</a></p>
+        <p><span>发布时间:</span>2017-04-01, 05:40:27</p>
+        <p><span>最后更新:</span>2017-04-18, 20:33:59</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/blog/2017/04/01/sshIntegration/" title="SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓">http://GitHubSupervise.io/blog/2017/04/01/sshIntegration/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://GitHubSupervise.io/blog/2017/04/01/sshIntegration/　　作者: Dr.Lester" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/blog/2017/03/17/IOC-AOP/">
+                    深入理解IOC与AOP
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/blog/2017/04/16/javaHighConcurrencyOne/">
+                    Java高并发秒杀系统API
+                </a>
+            </div>
+        
+    </nav>
+  
+
+
+</article>
+<div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh三大框架整合的意义及其精髓"><span class="toc-number">1.</span> <span class="toc-text">ssh三大框架整合的意义及其精髓</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#hibernate工作原理"><span class="toc-number">1.1.</span> <span class="toc-text">hibernate工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#为什么要用："><span class="toc-number">1.1.1.</span> <span class="toc-text">为什么要用：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hibernate是如何延迟加载"><span class="toc-number">1.1.2.</span> <span class="toc-text">Hibernate是如何延迟加载?</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hibernate中怎样实现类之间的关系-如：一对多、多对多的关系"><span class="toc-number">1.1.3.</span> <span class="toc-text">Hibernate中怎样实现类之间的关系?(如：一对多、多对多的关系)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hibernate的缓存机制"><span class="toc-number">1.1.4.</span> <span class="toc-text">Hibernate的缓存机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hibernate的查询方式-Sql、Criteria-object-comptosition"><span class="toc-number">1.1.5.</span> <span class="toc-text">Hibernate的查询方式 Sql、Criteria,object comptosition</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#如何优化Hibernate？"><span class="toc-number">1.1.6.</span> <span class="toc-text">如何优化Hibernate？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Struts工作原理"><span class="toc-number">1.2.</span> <span class="toc-text">Struts工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Struts工作机制？"><span class="toc-number">1.2.1.</span> <span class="toc-text">Struts工作机制？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#为什么要用：-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">为什么要用：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Struts的validate框架是如何验证的？"><span class="toc-number">1.2.3.</span> <span class="toc-text">Struts的validate框架是如何验证的？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Struts的架构"><span class="toc-number">1.2.4.</span> <span class="toc-text">Struts的架构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#spring工作原理"><span class="toc-number">1.3.</span> <span class="toc-text">spring工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#为什么用："><span class="toc-number">1.3.1.</span> <span class="toc-text">为什么用：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring-框架是一个分层架构，由7个定义良好的模块组成。"><span class="toc-number">1.3.2.</span> <span class="toc-text">Spring 框架是一个分层架构，由7个定义良好的模块组成。</span></a></li></ol></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+    <div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓　| Godql Code　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+    
+        <section class="youyan" id="comments">
+    <script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2122975';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+    <script> loadComment(); </script>
+    <div id="uyan_frame"></div>
+</section>
+    
+
+
+<div class="scroll" id="post-nav-button">
+        
+            <a href="/blog/2017/03/17/IOC-AOP/" title="上一篇: 深入理解IOC与AOP">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/blog/2017/04/16/javaHighConcurrencyOne/" title="下一篇: Java高并发秒杀系统API">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/blog/2017/04/16/javaHighConcurrencyOne/">Java高并发秒杀系统API</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/04/16/MVC/">如何优雅的写一个Java MVC框架</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/04/01/sshIntegration/">SSH2(Struts2,Spring4,Hibernate5)整合的意义及其精髓</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/03/17/IOC-AOP/">深入理解IOC与AOP</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/02/16/Execution_of_work/">《番茄工作法图解》思维导图读书笔记分享</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/02/04/Chrome/">非常完整的Chrome浏览器客户端调试大全</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/01/02/Awesome-java-cn/">Java资源大全中文版</a></li><li class="post-list-item"><a class="post-list-link" href="/blog/2017/01/02/professional-programmer/">各种优秀资料、神器及框架</a></li></ul>
+
+
+    <script>
+        
+    </script></div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2017 Dr.Lester <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+            <div class="footer-right">
+                <!--<a href="#" target="_blank" title="tooltip.Hexo">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="tooltip.Yelee  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>-->
+                <img src="/img/icp_min.png"><a href="http://www.miitbeian.gov.cn/">粤ICP备17006987号-1</a>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    <script data-main="/blog/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide()" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+
+  <a href="https://github.com/GitHubSupervise"><img style="position: absolute; top: 0; left: 0; border: 0" src="https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png"></a>
+
+</body>
